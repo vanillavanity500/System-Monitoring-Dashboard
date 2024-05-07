@@ -4,14 +4,24 @@ from matplotlib.animation import FuncAnimation
 import csv
 from datetime import datetime
 import logging
+import os
 
 # Configure logging
-logging.basicConfig(filename='monitoring.log', level=logging.ERROR)
+LOG_FILE = 'monitoring.log'
+logging.basicConfig(filename=LOG_FILE, level=logging.ERROR)
 
 # Function to send alerts
 def send_alert(message):
     print("ALERT:", message)
     logging.error("ALERT: " + message)
+
+# Function to truncate log file if it exceeds maximum size
+def truncate_log_file():
+    MAX_LOG_SIZE_BYTES = 1024 * 1024  # 1 MB
+    if os.path.exists(LOG_FILE):
+        if os.path.getsize(LOG_FILE) > MAX_LOG_SIZE_BYTES:
+            with open(LOG_FILE, 'w') as file:
+                file.truncate(0)
 
 # Function to update system metrics
 def update_metrics(frame):
@@ -39,7 +49,9 @@ def update_metrics(frame):
             send_alert("High Memory Usage!")
         if disk_percent > 80:
             send_alert("High Disk Usage!")
-    
+        
+        truncate_log_file()  # Clear log file periodically
+        
     except Exception as e:
         logging.error(str(e))
 
@@ -51,4 +63,3 @@ ani = FuncAnimation(fig, update_metrics, interval=1000)
 
 # Show the plot
 plt.show()
-
