@@ -4,24 +4,45 @@ from matplotlib.animation import FuncAnimation
 import csv
 from datetime import datetime
 import logging
-import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Configure logging
 LOG_FILE = 'monitoring.log'
 logging.basicConfig(filename=LOG_FILE, level=logging.ERROR)
 
+# Email configuration
+EMAIL_HOST = 'smtp.example.com'
+EMAIL_PORT = 587
+EMAIL_USERNAME = 'your_email@example.com'
+EMAIL_PASSWORD = 'your_email_password'
+EMAIL_RECEIVERS = ['recipient1@example.com', 'recipient2@example.com']
+
+# Function to send email alert
+def send_email(subject, message):
+    msg = MIMEMultipart()
+    msg['From'] = EMAIL_USERNAME
+    msg['To'] = ', '.join(EMAIL_RECEIVERS)
+    msg['Subject'] = subject
+    msg.attach(MIMEText(message, 'plain'))
+    
+    try:
+        server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
+        server.starttls()
+        server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
+        text = msg.as_string()
+        server.sendmail(EMAIL_USERNAME, EMAIL_RECEIVERS, text)
+        server.quit()
+        logging.info('Email alert sent successfully')
+    except Exception as e:
+        logging.error('Failed to send email alert: ' + str(e))
+
 # Function to send alerts
 def send_alert(message):
     print("ALERT:", message)
     logging.error("ALERT: " + message)
-
-# Function to truncate log file if it exceeds maximum size
-def truncate_log_file():
-    MAX_LOG_SIZE_BYTES = 1024 * 1024  # 1 MB
-    if os.path.exists(LOG_FILE):
-        if os.path.getsize(LOG_FILE) > MAX_LOG_SIZE_BYTES:
-            with open(LOG_FILE, 'w') as file:
-                file.truncate(0)
+    send_email("System Monitoring Alert", message)
 
 # Function to update system metrics
 def update_metrics(frame):
@@ -49,9 +70,7 @@ def update_metrics(frame):
             send_alert("High Memory Usage!")
         if disk_percent > 80:
             send_alert("High Disk Usage!")
-        
-        truncate_log_file()  # Clear log file periodically
-        
+    
     except Exception as e:
         logging.error(str(e))
 
@@ -63,3 +82,4 @@ ani = FuncAnimation(fig, update_metrics, interval=1000)
 
 # Show the plot
 plt.show()
+
