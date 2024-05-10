@@ -15,8 +15,8 @@ logging.basicConfig(filename=LOG_FILE, level=logging.ERROR)
 # Email configuration
 EMAIL_HOST = 'smtp.example.com'
 EMAIL_PORT = 587
-EMAIL_USERNAME = 'your_email@example.com'
-EMAIL_PASSWORD = 'your_email_password'
+EMAIL_USERNAME = 'my_email_@example.com'
+EMAIL_PASSWORD = 'my_email_password'
 EMAIL_RECEIVERS = ['recipient1@example.com', 'recipient2@example.com']
 
 # Function to send email alert
