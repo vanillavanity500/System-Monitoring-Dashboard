@@ -83,3 +83,4 @@ ani = FuncAnimation(fig, update_metrics, interval=1000)
 # Show the plot
 plt.show()
 
+# Need to improve UI and add more authentication features
